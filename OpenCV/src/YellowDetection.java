@@ -48,7 +48,7 @@ public class YellowDetection {
             // Draw bounding boxes around detected yellow objects
             for (MatOfPoint contour : contours) {
                 double area = Imgproc.contourArea(contour);
-                if(area > 1000){
+                if(area > 2000){
                     Rect boundingRect = Imgproc.boundingRect(contour);
                     Imgproc.rectangle(frame, boundingRect.tl(), boundingRect.br(), new Scalar(0, 255, 255), 2);
                 }

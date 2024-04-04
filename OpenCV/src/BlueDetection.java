@@ -6,7 +6,7 @@ import org.opencv.videoio.VideoCapture;
 import java.util.ArrayList;
 import java.util.List;
 
-public class YellowDetection {
+public class BlueDetection {
 
     public static void main(String[] args) {
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
@@ -18,7 +18,6 @@ public class YellowDetection {
             System.exit(1);
         }
 
-
         Mat frame = new Mat();
         do {
             videoCapture.read(frame);
@@ -29,37 +28,28 @@ public class YellowDetection {
             Mat hsvFrame = new Mat();
             Imgproc.cvtColor(frame, hsvFrame, Imgproc.COLOR_BGR2HSV);
 
-            //Colors for Yellow
-
-            Scalar lowerYellow = new Scalar(20, 100, 100);
-            Scalar upperYellow = new Scalar(30, 255, 255);
-
-            //Colors for Red
-            Scalar lowerRed = new Scalar(0, 100, 100);
-            Scalar upperRed = new Scalar(10, 255, 255);
-
             //Colors for Blue
             Scalar lowerBlue = new Scalar(90, 40, 40);
             Scalar upperBlue = new Scalar(150, 255, 255);
 
-            //Create a mask for yellow regions
-            Mat yellowMask = new Mat();
-            Core.inRange(hsvFrame, lowerYellow, upperYellow, yellowMask);
 
-            // Find contours in the yellow mask
-            List<MatOfPoint> contours = new ArrayList<>();
-            Mat hierarchy = new Mat();
-            Imgproc.findContours(yellowMask, contours, hierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
+            //Create a mask for Red regions
+            Mat blueMask = new Mat();
+            Core.inRange(hsvFrame, lowerBlue, upperBlue, blueMask);
 
-            // Draw bounding boxes around detected yellow objects
-            for (MatOfPoint contour : contours) {
-                double area = Imgproc.contourArea(contour);
+            // Find contours in the blue mask
+            List<MatOfPoint> blueContours = new ArrayList<>();
+            Mat blueHierarchy = new Mat();
+            Imgproc.findContours(blueMask, blueContours, blueHierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
+
+            // Draw bounding boxes around detected Red objects
+            for (MatOfPoint blueContour : blueContours) {
+                double area = Imgproc.contourArea(blueContour);
                 if (area > 2000) {
-                    Rect boundingRect = Imgproc.boundingRect(contour);
+                    Rect boundingRect = Imgproc.boundingRect(blueContour);
                     Imgproc.rectangle(frame, boundingRect.tl(), boundingRect.br(), new Scalar(0, 255, 255), 2);
                 }
             }
-
 
             HighGui.namedWindow("Webcam Feed", HighGui.WINDOW_AUTOSIZE);
 

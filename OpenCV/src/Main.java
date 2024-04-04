@@ -1,6 +1,6 @@
 import org.opencv.core.*;
 import org.opencv.highgui.HighGui;
-import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.videoio.VideoCapture;
 import org.opencv.imgproc.Imgproc;
 
 import java.util.ArrayList;
@@ -10,80 +10,63 @@ public class Main {
     public static void main(String[] args) {
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 
-        // Load the input image
-        Mat inputImage = Imgcodecs.imread("src/multicolor_objects.jpg");
+        // Create a VideoCapture object to capture video from the webcam
+        VideoCapture videoCapture = new VideoCapture(0); // 0 for the default webcam, change if necessary
 
-        if (inputImage.empty()) {
-            System.err.println("Error: Unable to load image.");
+        // Check if the VideoCapture object is opened successfully
+        if (!videoCapture.isOpened()) {
+            System.err.println("Error: Unable to open webcam.");
             System.exit(1);
         }
 
-        // Define the lower and upper bounds for each color
-        Scalar lowerRedBound = new Scalar(0, 0, 60);
-        Scalar upperRedBound = new Scalar(100, 100, 255);
+        // Create a window to display the webcam feed
+        HighGui.namedWindow("Webcam Feed");
 
-        Scalar lowerBlueBound = new Scalar(90, 0, 0);
-        Scalar upperBlueBound = new Scalar(255, 40, 40); // Adjusted bounds for blue color
+        while (true) {
+            // Capture a frame from the webcam
+            Mat frame = new Mat();
+            videoCapture.read(frame);
 
-        Scalar lowerOrangeBound = new Scalar(0, 50, 100);
-        Scalar upperOrangeBound = new Scalar(50, 150, 255);
+            // Check if the frame is empty
+            if (frame.empty()) {
+                System.err.println("Error: Unable to capture frame.");
+                break;
+            }
 
-        // Create masks to segment regions of each color
-        Mat redMask = new Mat();
-        Mat blueMask = new Mat();
-        Mat orangeMask = new Mat();
+            // Convert frame to HSV color space
+            Mat hsvFrame = new Mat();
+            Imgproc.cvtColor(frame, hsvFrame, Imgproc.COLOR_BGR2HSV);
 
-        Core.inRange(inputImage, lowerRedBound, upperRedBound, redMask);
-        Core.inRange(inputImage, lowerBlueBound, upperBlueBound, blueMask);
-        Core.inRange(inputImage, lowerOrangeBound, upperOrangeBound, orangeMask);
+            // Define lower and upper bounds for yellow color in HSV
+            Scalar lowerYellow = new Scalar(20, 100, 100);
+            Scalar upperYellow = new Scalar(30, 255, 255);
 
-        // Find contours in the segmented images
-        List<MatOfPoint> redContours = new ArrayList<>();
-        List<MatOfPoint> blueContours = new ArrayList<>();
-        List<MatOfPoint> orangeContours = new ArrayList<>();
+            // Create a mask to segment yellow regions
+            Mat yellowMask = new Mat();
+            Core.inRange(hsvFrame, lowerYellow, upperYellow, yellowMask);
 
-        Imgproc.findContours(redMask, redContours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
-        Imgproc.findContours(blueMask, blueContours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
-        Imgproc.findContours(orangeMask, orangeContours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
+            // Find contours in the yellow mask
+            List<MatOfPoint> contours = new ArrayList<>();
+            Mat hierarchy = new Mat();
+            Imgproc.findContours(yellowMask, contours, hierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
 
-        // Get the bounding rectangles for each contour
-        List<Rect> redBoundingBoxes = new ArrayList<>();
-        List<Rect> blueBoundingBoxes = new ArrayList<>();
-        List<Rect> orangeBoundingBoxes = new ArrayList<>();
+            // Draw bounding boxes around detected yellow objects
+            for (MatOfPoint contour : contours) {
+                Rect boundingRect = Imgproc.boundingRect(contour);
+                Imgproc.rectangle(frame, boundingRect.tl(), boundingRect.br(), new Scalar(0, 255, 255), 2);
+            }
 
-        for (MatOfPoint contour : redContours) {
-            Rect boundingBox = Imgproc.boundingRect(contour);
-            redBoundingBoxes.add(boundingBox);
+            // Display the frame with bounding boxes
+            HighGui.imshow("Webcam Feed", frame);
+
+            // Check for key press
+            if (HighGui.waitKey(10) == 27) { // 27 is the ASCII code for Escape key
+                break;
+            }
         }
 
-        for (MatOfPoint contour : blueContours) {
-            Rect boundingBox = Imgproc.boundingRect(contour);
-            blueBoundingBoxes.add(boundingBox);
-        }
-
-        for (MatOfPoint contour : orangeContours) {
-            Rect boundingBox = Imgproc.boundingRect(contour);
-            orangeBoundingBoxes.add(boundingBox);
-        }
-
-        // Draw bounding boxes on the original image for each color
-        for (Rect box : redBoundingBoxes) {
-            Imgproc.rectangle(inputImage, new Point(box.x, box.y), new Point(box.x + box.width, box.y + box.height),
-                    new Scalar(0, 0, 255), 2); // Red color
-        }
-
-        for (Rect box : blueBoundingBoxes) {
-            Imgproc.rectangle(inputImage, new Point(box.x, box.y), new Point(box.x + box.width, box.y + box.height),
-                    new Scalar(255, 0, 0), 2); // Blue color
-        }
-
-        for (Rect box : orangeBoundingBoxes) {
-            Imgproc.rectangle(inputImage, new Point(box.x, box.y), new Point(box.x + box.width, box.y + box.height),
-                    new Scalar(0, 165, 255), 2); // Orange color
-        }
-
-        // Display the image with bounding boxes
-        HighGui.imshow("Bounding Boxes", inputImage);
-        HighGui.waitKey(0);
+        // Release the VideoCapture object and close the window
+        videoCapture.release();
+        HighGui.destroyAllWindows();
     }
 }

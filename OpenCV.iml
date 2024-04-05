@@ -10,17 +10,28 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$USER_HOME$/Desktop/opencv/build/java/opencv-490.jar!/" />
+          <root url="jar://$USER_HOME$/Downloads/opencv/build/java/opencv-490.jar!/" />
         </CLASSES>
         <JAVADOC />
         <NATIVE>
-          <root url="file://$USER_HOME$/Desktop/opencv/build/java/x64" />
+          <root url="file://$USER_HOME$/Downloads/opencv/build/java/x64" />
         </NATIVE>
         <SOURCES>
-          <root url="jar://$USER_HOME$/Desktop/opencv/build/java/opencv-490.jar!/" />
-          <root url="jar://$USER_HOME$/Desktop/opencv/build/java/opencv-490.jar!/" />
+          <root url="jar://$USER_HOME$/Downloads/opencv/build/java/opencv-490.jar!/" />
+          <root url="jar://$USER_HOME$/Downloads/opencv/build/java/opencv-490.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES />
+        <JAVADOC />
+        <SOURCES>
+          <root url="file://$USER_HOME$/Desktop/webcam-capture-master/webcam-capture-master/webcam-capture/src/main/java" />
+          <root url="file://$USER_HOME$/Desktop/webcam-capture-master/webcam-capture-master/webcam-capture/src/test/java" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="library" name="slf4j-api-1.7.2" level="project" />
   </component>
 </module>

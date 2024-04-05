@@ -29,17 +29,13 @@ public class OpenCVData {
         Scalar lowerYellow = new Scalar(20, 100, 100);
         Scalar upperYellow = new Scalar(30, 255, 255);
 
-        //Colors for Red
-        Scalar lowerRed = new Scalar(160, 100, 100);
-        Scalar upperRed = new Scalar(180, 255, 255);
+        Scalar lowerRed = new Scalar(0, 100, 100); // Lower bound for red (Hue: 0-10)
+        Scalar upperRed = new Scalar(10, 255, 255); // Upper bound for red (Hue: 0-10)
 
-        //Colors for Blue
-        Scalar lowerBlue = new Scalar(90, 40, 40);
-        Scalar upperBlue = new Scalar(150, 255, 255);
 
         //Create a mask for yellow regions
         Mat yellowMask = new Mat();
-        Core.inRange(hsvFrame, lowerYellow, upperYellow, yellowMask);
+        Core.inRange(hsvFrame, lowerRed, upperRed, yellowMask);
 
         // Find contours in the yellow mask
         List<MatOfPoint> contours = new ArrayList<>();
@@ -47,17 +43,29 @@ public class OpenCVData {
         Imgproc.findContours(yellowMask, contours, hierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
 
         // Draw bounding boxes around detected yellow objects
+// Draw bounding boxes around detected yellow objects
         for (MatOfPoint contour : contours) {
             double area = Imgproc.contourArea(contour);
-            if (area > 2000) {
+            if (area > 2000) { // Adjust this threshold as needed
+                // Get bounding rectangle
                 Rect boundingRect = Imgproc.boundingRect(contour);
+
                 Imgproc.rectangle(bgrFrame, boundingRect.tl(), boundingRect.br(), new Scalar(0, 255, 255), 2);
+
+                double cX = boundingRect.x + boundingRect.width / 2.0;
+                double cY = boundingRect.y + boundingRect.height / 2.0;
+
+                Imgproc.circle(bgrFrame, new Point(cX, cY), 5, new Scalar(255, 0, 0), -1);
+
+                String text = "X: " + (int) cX + ", Y: " + (int) cY;
+                Imgproc.putText(bgrFrame, text, new Point((int) cX + 10, (int) cY + 10), Imgproc.FONT_HERSHEY_SIMPLEX, 0.5, new Scalar(0, 0, 255), 2);
             }
         }
 
         HighGui.imshow("Webcam Feed", bgrFrame);
         HighGui.namedWindow("Webcam Feed", HighGui.WINDOW_AUTOSIZE);
         HighGui.waitKey(1);
+
 
     }
 

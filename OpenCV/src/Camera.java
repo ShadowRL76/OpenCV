@@ -25,6 +25,7 @@ public class Camera {
         panel.setImageSizeDisplayed(true);
         panel.setMirrored(true);
 
+
         JFrame window = new JFrame("Camera");
         window.add(panel);
         window.setResizable(true);
